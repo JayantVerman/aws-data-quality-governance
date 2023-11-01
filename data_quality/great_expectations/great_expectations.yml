@@ -1,0 +1,6 @@
+config_version: 3.0
+datasources:
+  pandas_s3:
+    class_name: Datasource
+    execution_engine:
+      class_name: PandasExecutionEngine

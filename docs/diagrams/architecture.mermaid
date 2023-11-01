@@ -1,0 +1,13 @@
+graph LR
+    A[Faker Data Generator] -->|Raw CSV| B[S3 Raw Bucket]
+    B -->|Crawl| C[AWS Glue Data Catalog]
+    C -->|Validate| D[Great Expectations]
+    D -->|Pass| E[S3 Curated Bucket]
+    D -->|Fail| F[S3 Quarantine Bucket]
+    B -->|Classify| G[AWS Macie PII Scan]
+    G -->|Findings| H[AWS Lake Formation]
+    H -->|Masked Query| I[Amazon Athena]
+    D -.->|Alert| J[Amazon SNS / Slack]
+    G -.->|Alert| J
+    A & D & H -->|Events| K[OpenLineage / Marquez]
+    K --> L[Streamlit Dashboard]

@@ -1,0 +1,4 @@
+transport:
+  type: "http"
+  url: "http://localhost:8080"
+  endpoint: "/api/v1/lineage"

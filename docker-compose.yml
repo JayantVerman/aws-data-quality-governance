@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${MARQUEZ_DB_NAME:-marquez}
+      POSTGRES_USER: ${MARQUEZ_DB_USER:-marquez}
+      POSTGRES_PASSWORD: ${MARQUEZ_DB_PASSWORD:-marquez}
+    volumes:
+      - marquez-postgres-data:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  marquez:
+    image: openlineage/marquez:v0.44.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MARQUEZ_DB_HOST: postgres
+      MARQUEZ_DB_PORT: 5432
+      MARQUEZ_DB_NAME: ${MARQUEZ_DB_NAME:-marquez}
+      MARQUEZ_DB_USER: ${MARQUEZ_DB_USER:-marquez}
+      MARQUEZ_DB_PASSWORD: ${MARQUEZ_DB_PASSWORD:-marquez}
+      JAVA_OPTS: "-Xmx512m"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  airflow:
+    image: puckel/docker-airflow
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./orchestration/airflow/dags:/usr/local/airflow/dags
+      - ./orchestration/airflow:/usr/local/airflow/orchestration
+      - ./data_generator:/usr/local/airflow/data_generator
+      - ./governance:/usr/local/airflow/governance
+      - ./data_quality:/usr/local/airflow/data_quality
+      - ./scripts:/usr/local/airflow/scripts
+      - ./lineage:/usr/local/airflow/lineage
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__API__ENABLED: "True"
+      AIRFLOW__OPENLINEAGE__TRANSPORT: http
+      AIRFLOW__OPENLINEAGE__URL: ${MARQUEZ_URL:-http://marquez:8080}
+      AIRFLOW__OPENLINEAGE__API_KEY: ${OPENLINEAGE_API_KEY:-}
+    depends_on:
+      marquez:
+        condition: service_healthy
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./viz/streamlit_app:/app/viz/streamlit_app
+    environment:
+      MARQUEZ_URL: ${MARQUEZ_URL:-http://marquez:8080}
+    depends_on:
+      marquez:
+        condition: service_healthy
+
+volumes:
+  marquez-postgres-data:
