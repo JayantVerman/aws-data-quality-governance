@@ -22,7 +22,7 @@ from typing import Optional
 
 from faker import Faker
 
-from common.logging_utils import get_logger
+from logging_utils import get_logger
 
 log = get_logger(__name__)
 
