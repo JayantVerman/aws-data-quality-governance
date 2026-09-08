@@ -121,7 +121,7 @@ SELECT customer_id, first_name, email, ssn FROM customers LIMIT 1;
 
 ## Acknowledgments & AI Assistance Disclosure
 
-Built by **Jayant Verman**. AI tools (Claude/Cline) were utilized to scaffold boilerplate Terraform definitions and Airflow DAG wiring. Architecture decisions, data quality rules, governance policies, and debugging were designed and driven by me.
+Built by **Jayant Verman**. AI tools (ChatGPT) were utilized to scaffold boilerplate Terraform definitions and Airflow DAG wiring. Architecture decisions, data quality rules, governance policies, and debugging were designed and driven by me in future it will be need some upgrades so follow its structure or i will update it by my self time to time and if anyone find any problem or any fault and any need to improvement so let me know it by commenting on it we can discuss it as healthy tech talk.
 
 ## License
 
